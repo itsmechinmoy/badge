@@ -3,7 +3,7 @@ name: Calculate Artifact Downloads
 on:
   workflow_dispatch:
   workflow_run:
-    workflows: ["build.yml"]
+    workflows: ["nightly.yml"]
     types:
       - completed
 
