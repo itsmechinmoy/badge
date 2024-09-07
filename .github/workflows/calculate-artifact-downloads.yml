@@ -21,8 +21,8 @@ jobs:
         id: artifacts
         run: |
           # Define the owner and repo of the target repository
-          TARGET_OWNER="brahmkshatriya"  # Replace with the owner of the target repository
-          TARGET_REPO="echo-discord"  # Replace with the name of the target repository
+          TARGET_OWNER="brahmkshatriya"
+          TARGET_REPO="echo-discord"
           
           # Fetch artifacts from the target repository using GitHub API
           artifacts=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
@@ -34,21 +34,23 @@ jobs:
           
           # Calculate the total download count, handle null values
           total_downloads=$(echo "$artifacts" | jq '[.artifacts[] | .download_count // 0] | add')
+          
+          # Set the output for total downloads
           echo "Total downloads from $TARGET_REPO: $total_downloads"
           echo "total_downloads=$total_downloads" >> $GITHUB_ENV
 
       - name: Update Downloads JSON
         run: |
+          total_downloads=${{ env.total_downloads }} # Reference the environment variable correctly
           echo '{
             "schemaVersion": 1,
             "label": "downloads",
-            "message": "'$total_downloads'",
+            "message": "'"${total_downloads}"'",
             "color": "blue"
           }' > downloads.json
 
       - name: Debug Downloads JSON
-        run: |
-          cat downloads.json
+        run: cat downloads.json
 
       - name: Commit and Push Changes
         run: |
@@ -58,4 +60,4 @@ jobs:
           git commit -m "Update downloads count"
           git push
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure this token has write permissions
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Ensure this token has write permissions
