@@ -60,4 +60,4 @@ jobs:
           git commit -m "Update downloads count"
           git push
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Ensure this token has write permissions
+          GITHUB_TOKEN: ${{ secrets.TOKEN }} # Ensure this token has write permissions
