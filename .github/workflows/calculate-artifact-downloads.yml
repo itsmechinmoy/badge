@@ -25,16 +25,21 @@ jobs:
           TARGET_REPO="echo-discord"
           
           # Fetch artifacts from the target repository using GitHub API
-          artifacts=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          response=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
             "https://api.github.com/repos/$TARGET_OWNER/$TARGET_REPO/actions/artifacts")
           
           # Debug output
-          echo "Artifact API response: $artifacts"
+          echo "Artifact API response: $response"
           
-          # Calculate the total download count, handle null values
-          total_downloads=$(echo "$artifacts" | jq '[.artifacts[] | .download_count // 0] | add')
+          # Calculate the total download count, handle null values and errors
+          total_downloads=$(echo "$response" | jq '[.artifacts[] | .download_count // 0] | add')
           
+          if [ -z "$total_downloads" ]; then
+            echo "Failed to calculate total downloads."
+            exit 1
+          fi
+
           # Set the output for total downloads
           echo "Total downloads from $TARGET_REPO: $total_downloads"
           echo "total_downloads=$total_downloads" >> $GITHUB_ENV
@@ -53,11 +58,11 @@ jobs:
         run: cat downloads.json
 
       - name: Commit and Push Changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }} # Ensure this token has write permissions
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
           git add downloads.json
           git commit -m "Update downloads count"
           git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }} # Ensure this token has write permissions
