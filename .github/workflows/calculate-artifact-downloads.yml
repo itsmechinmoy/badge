@@ -1,0 +1,21 @@
+name: Calculate Artifact Downloads
+
+on:
+  workflow_run:
+    workflows: ["Your Workflow Name"]
+    types:
+      - completed
+
+jobs:
+  calculate-downloads:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Artifacts
+        id: artifacts
+        run: |
+          artifacts=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/artifacts" | jq '.artifacts')
+          total_downloads=$(echo "$artifacts" | jq '[.[] | .download_count] | add')
+          echo "Total downloads: $total_downloads"
+          echo "total_downloads=$total_downloads" >> $GITHUB_ENV
