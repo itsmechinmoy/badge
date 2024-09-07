@@ -3,7 +3,7 @@ name: Calculate Artifact Downloads
 on:
   workflow_dispatch:
   workflow_run:
-    workflows: ["nightly.yml"]
+    workflows: ["build.yml"]
     types:
       - completed
 
@@ -22,7 +22,7 @@ jobs:
         run: |
           # Define the owner and repo of the target repository
           TARGET_OWNER="brahmkshatriya"  # Replace with the owner of the target repository
-          TARGET_REPO="echo"  # Replace with the name of the target repository
+          TARGET_REPO="eecho-youtube-extension"  # Replace with the name of the target repository
           
           # Fetch artifacts from the target repository using GitHub API
           artifacts=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
