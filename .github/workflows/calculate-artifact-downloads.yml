@@ -11,17 +11,30 @@ jobs:
   calculate-downloads:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Install jq
         run: sudo apt-get install -y jq
 
-      - name: Get Artifacts
+      - name: Get Artifacts from Another Repository
         id: artifacts
         run: |
+          # Define the owner and repo of the target repository
+          TARGET_OWNER="brahmkshatriya"  # Replace with the owner of the target repository
+          TARGET_REPO="echo"  # Replace with the name of the target repository
+          
+          # Fetch artifacts from the target repository using GitHub API
           artifacts=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/${{ github.repository }}/actions/artifacts" | jq '.artifacts')
-          total_downloads=$(echo "$artifacts" | jq '[.[] | .download_count] | add')
-          echo "Total downloads: $total_downloads"
+            "https://api.github.com/repos/$TARGET_OWNER/$TARGET_REPO/actions/artifacts")
+          
+          # Debug output
+          echo "Artifact API response: $artifacts"
+          
+          # Calculate the total download count
+          total_downloads=$(echo "$artifacts" | jq '[.artifacts[] | .download_count] | add')
+          echo "Total downloads from $TARGET_REPO: $total_downloads"
           echo "total_downloads=$total_downloads" >> $GITHUB_ENV
 
       - name: Update Downloads JSON
