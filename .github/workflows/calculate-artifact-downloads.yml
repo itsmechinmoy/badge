@@ -32,8 +32,8 @@ jobs:
           # Debug output
           echo "Artifact API response: $artifacts"
           
-          # Calculate the total download count
-          total_downloads=$(echo "$artifacts" | jq '[.artifacts[] | .download_count] | add')
+          # Calculate the total download count, handle null values
+          total_downloads=$(echo "$artifacts" | jq '[.artifacts[] | .download_count // 0] | add')
           echo "Total downloads from $TARGET_REPO: $total_downloads"
           echo "total_downloads=$total_downloads" >> $GITHUB_ENV
 
@@ -58,4 +58,4 @@ jobs:
           git commit -m "Update downloads count"
           git push
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure this token has write permissions
